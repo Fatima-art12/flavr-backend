@@ -5,10 +5,15 @@ import db from './db.js'
 import jwt from 'jsonwebtoken'
 import multer from 'multer'
 import path from 'path'
+import fs from 'fs'
 
 const app = express()
 const PORT = 5000
 const JWT_SECRET = 'flavr_secret_key_change_later'
+
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads')
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
