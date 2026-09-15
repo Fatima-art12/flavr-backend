@@ -4,24 +4,24 @@ import bcrypt from 'bcrypt'
 import db from './db.js'
 import jwt from 'jsonwebtoken'
 import multer from 'multer'
-import path from 'path'
-import fs from 'fs'
+import { v2 as cloudinary } from 'cloudinary'
+import { CloudinaryStorage } from 'multer-storage-cloudinary'
 
 const app = express()
 const PORT = 5000
 const JWT_SECRET = 'flavr_secret_key_change_later'
 
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads')
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/')
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + path.extname(file.originalname)
-    cb(null, uniqueName)
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'flavr',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
   }
 })
 
@@ -29,7 +29,6 @@ const upload = multer({ storage })
 
 app.use(cors())
 app.use(express.json())
-app.use('/uploads', express.static('uploads'))
 
 app.get('/', (req, res) => {
   res.send('Flavr backend is running!')
@@ -168,7 +167,7 @@ app.post('/api/upload-profile-picture', upload.single('profilePicture'), async (
       return res.status(400).json({ message: 'Missing user ID or file' })
     }
 
-    const filename = req.file.filename
+    const filename = req.file.path
 
     await db.query('UPDATE users SET profile_picture = ? WHERE id = ?', [filename, userId])
 
@@ -184,7 +183,7 @@ app.post('/api/upload-recipe-image', upload.single('recipeImage'), async (req, r
       return res.status(400).json({ message: 'No file uploaded' })
     }
 
-    res.json({ message: 'Image uploaded!', filename: req.file.filename })
+    res.json({ message: 'Image uploaded!', filename: req.file.path })
   } catch (error) {
     res.status(500).json({ message: 'Upload failed', error: error.message })
   }
