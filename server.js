@@ -152,7 +152,13 @@ app.post('/api/login', async (req, res) => {
     res.json({
       message: 'Login successful!',
       token,
-      user: { id: user.id, name: user.name, email: user.email, is_admin: user.is_admin }
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        is_admin: user.is_admin,
+        profile_picture: user.profile_picture
+      }
     })
   } catch (error) {
     res.status(500).json({ message: 'Login failed', error: error.message })
