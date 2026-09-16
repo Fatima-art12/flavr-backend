@@ -189,6 +189,11 @@ app.post('/api/upload-recipe-image', upload.single('recipeImage'), async (req, r
   }
 })
 
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.message)
+  res.status(500).json({ message: 'Server error', error: err.message })
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
 })
