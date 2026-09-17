@@ -54,15 +54,15 @@ app.get('/api/recipes', async (req, res) => {
 
 app.post('/api/recipes', async (req, res) => {
   try {
-    const { title, image, ingredients, steps, time_minutes, difficulty, cuisine } = req.body
+    const { title, image, ingredients, steps, time_minutes, difficulty, cuisine, is_trending, is_popular } = req.body
 
     if (!title || !ingredients || !steps) {
       return res.status(400).json({ message: 'Please fill in all required fields' })
     }
 
     const [result] = await db.query(
-      'INSERT INTO recipes (title, image, ingredients, steps, time_minutes, difficulty, cuisine) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [title, image, ingredients, steps, time_minutes, difficulty, cuisine]
+      'INSERT INTO recipes (title, image, ingredients, steps, time_minutes, difficulty, cuisine, is_trending, is_popular) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [title, image, ingredients, steps, time_minutes, difficulty, cuisine, is_trending ? 1 : 0, is_popular ? 1 : 0]
     )
 
     res.status(201).json({ message: 'Recipe added!', id: result.insertId })
@@ -74,11 +74,11 @@ app.post('/api/recipes', async (req, res) => {
 app.put('/api/recipes/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const { title, image, ingredients, steps, time_minutes, difficulty, cuisine } = req.body
+    const { title, image, ingredients, steps, time_minutes, difficulty, cuisine, is_trending, is_popular } = req.body
 
     await db.query(
-      'UPDATE recipes SET title = ?, image = ?, ingredients = ?, steps = ?, time_minutes = ?, difficulty = ?, cuisine = ? WHERE id = ?',
-      [title, image, ingredients, steps, time_minutes, difficulty, cuisine, id]
+      'UPDATE recipes SET title = ?, image = ?, ingredients = ?, steps = ?, time_minutes = ?, difficulty = ?, cuisine = ?, is_trending = ?, is_popular = ? WHERE id = ?',
+      [title, image, ingredients, steps, time_minutes, difficulty, cuisine, is_trending ? 1 : 0, is_popular ? 1 : 0, id]
     )
 
     res.json({ message: 'Recipe updated!' })
